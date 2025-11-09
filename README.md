@@ -1,197 +1,267 @@
-# DAS-Processing-Toolkit
+# DAS Processing Toolkit
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python Version](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://www.python.org/downloads/)
-[![Status](https://img.shields.io/badge/status-in%20development-orange.svg)]()
-
-A Python toolkit for digital signal processing and preprocessing of Distributed Acoustic Sensing (DAS) data.
-
-## Overview
-
-Distributed Acoustic Sensing (DAS) is an advanced technology that transforms fiber optic cables into distributed sensor arrays, enabling continuous measurement of acoustic signals, vibrations, and strain along the entire cable length. DAS systems generate large volumes of high-dimensional spatiotemporal data that require sophisticated signal processing techniques for analysis and interpretation.
-
-The **DAS-Processing-Toolkit** provides a comprehensive suite of digital filtering algorithms specifically designed to preprocess DAS data. The toolkit addresses common challenges in DAS data analysis including:
-
-- **Noise reduction**: Removal of environmental and instrumental noise from DAS signals
-- **Signal enhancement**: Improvement of signal-to-noise ratio for weak signals
-- **Frequency filtering**: Isolation of signals in specific frequency bands
-- **Data conditioning**: Preparation of DAS data for downstream analysis and machine learning applications
-
-### Motivation
-
-DAS technology is increasingly deployed across diverse applications including:
-
-- Seismic monitoring and earthquake detection
-- Infrastructure monitoring (bridges, pipelines, railways)
-- Borehole geophysical measurements
-- Perimeter security and intrusion detection
-- Traffic monitoring and smart cities
-- Subsurface imaging and exploration
-
-Each application domain requires tailored signal processing workflows to extract meaningful information from raw DAS data. This toolkit provides researchers and practitioners with robust, well-tested filtering algorithms to streamline their DAS data processing pipelines.
+A comprehensive Python toolkit for processing and visualizing Distributed Acoustic Sensing (DAS) data with publication-quality figures.
 
 ## Features
 
-- **Digital Filter Implementations**: Butterworth, Chebyshev, Elliptic, and Bessel filters
-- **Frequency Domain Processing**: FFT-based filtering and spectral analysis
-- **Temporal Filtering**: Bandpass, lowpass, highpass, and bandstop filters
-- **Spatial Filtering**: Along-fiber filtering for coherent noise removal
-- **Batch Processing**: Efficient processing of large DAS datasets
-- **NumPy Integration**: Seamless integration with scientific Python ecosystem
+### Visualization Module
+
+The toolkit provides three main visualization functions for DAS data analysis:
+
+1. **`plot_das_section()`** - Wiggle trace and variable density displays
+   - Classic seismic section visualization
+   - Customizable wiggle traces with fill
+   - Variable density (image) display
+   - Publication-quality matplotlib figures
+
+2. **`plot_spectrogram()`** - Frequency analysis
+   - Short-Time Fourier Transform (STFT) based spectrograms
+   - Customizable time-frequency resolution
+   - Multiple window functions and colormaps
+   - dB or linear scale options
+
+3. **`plot_velocity_profile()`** - VSP (Vertical Seismic Profiling) results
+   - Velocity vs depth plotting
+   - Error bars and uncertainty bands
+   - Multiple profile comparison
+   - Geological layer markers
 
 ## Installation
 
-### Prerequisites
-
-- Python 3.8 or higher
-- NumPy >= 1.19.0
-- SciPy >= 1.5.0
-
-### Install via pip
+### From source
 
 ```bash
-# Installation from PyPI (once published)
-pip install das-processing-toolkit
-
-# Installation from source
 git clone https://github.com/shbokijon/DAS-Processing-Toolkit.git
 cd DAS-Processing-Toolkit
 pip install -e .
 ```
 
-### Install via conda
+### Requirements
 
-```bash
-# Create a new conda environment (recommended)
-conda create -n das-processing python=3.9
-conda activate das-processing
-
-# Install the package (once published to conda-forge)
-conda install -c conda-forge das-processing-toolkit
-
-# Or install from source
-git clone https://github.com/shbokijon/DAS-Processing-Toolkit.git
-cd DAS-Processing-Toolkit
-pip install -e .
-```
+- Python >= 3.7
+- numpy >= 1.20.0
+- scipy >= 1.7.0
+- matplotlib >= 3.4.0
 
 ## Quick Start
 
-Here's a simple example demonstrating how to apply a Butterworth bandpass filter to DAS data:
+### 1. DAS Section Visualization
 
 ```python
 import numpy as np
-from das_processing import filters
+from das_toolkit import plot_das_section
 
-# Load your DAS data (shape: [n_channels, n_samples])
-# Each row represents one channel along the fiber
-das_data = np.load('path/to/your/das_data.npy')
-sampling_rate = 1000  # Hz
+# Load or generate DAS data
+data = np.random.randn(1000, 50)  # (time_samples, channels)
+time = np.linspace(0, 2, 1000)    # seconds
+distance = np.linspace(0, 100, 50)  # meters
 
-# Design a Butterworth bandpass filter (10-100 Hz)
-filtered_data = filters.butterworth_bandpass(
-    data=das_data,
-    lowcut=10.0,      # Lower frequency bound (Hz)
-    highcut=100.0,    # Upper frequency bound (Hz)
-    fs=sampling_rate, # Sampling frequency (Hz)
-    order=4           # Filter order
+# Create wiggle trace plot
+fig, ax = plot_das_section(
+    data, time, distance,
+    wiggle=True,
+    wiggle_scale=1.5,
+    wiggle_skip=2,
+    title='DAS Section',
+    cmap='seismic'
 )
-
-# Apply additional noise reduction
-cleaned_data = filters.median_filter_spatial(
-    data=filtered_data,
-    kernel_size=3  # Filter along spatial (channel) dimension
-)
-
-# Save processed data
-np.save('processed_das_data.npy', cleaned_data)
 ```
 
-### Working with Time-Series Data
+### 2. Spectrogram Analysis
 
 ```python
-from das_processing import filters, utils
+from das_toolkit import plot_spectrogram
 
-# Load DAS data
-das_data, metadata = utils.load_das_file('recording.h5')
+# Generate or load signal
+fs = 1000  # Sampling frequency in Hz
+signal = np.sin(2 * np.pi * 50 * np.linspace(0, 10, fs * 10))
 
-# Extract a single channel for processing
-channel_idx = 100
-signal = das_data[channel_idx, :]
-
-# Apply lowpass filter to remove high-frequency noise
-signal_filtered = filters.butterworth_lowpass(
-    data=signal,
-    cutoff=50.0,      # Cutoff frequency (Hz)
-    fs=metadata['sampling_rate'],
-    order=5
+# Plot spectrogram
+fig, ax, f, t, Sxx = plot_spectrogram(
+    signal,
+    fs=fs,
+    fmax=200,
+    nperseg=512,
+    title='Frequency Analysis',
+    cmap='viridis'
 )
-
-# Visualize results
-import matplotlib.pyplot as plt
-utils.plot_comparison(signal, signal_filtered, fs=metadata['sampling_rate'])
-plt.savefig('filtering_result.png')
 ```
 
-## Documentation
+### 3. Velocity Profile (VSP)
 
-Full API documentation is available at: [https://das-processing-toolkit.readthedocs.io](https://das-processing-toolkit.readthedocs.io) *(in development)*
+```python
+from das_toolkit import plot_velocity_profile
 
-For additional examples and tutorials, see the [`examples/`](examples/) directory.
+# VSP data
+depth = np.linspace(0, 1000, 50)  # meters
+velocity = 1500 + 0.6 * depth      # m/s
+velocity_error = 50 * np.ones_like(velocity)
 
-## Project Status
+# Plot velocity profile
+fig, ax = plot_velocity_profile(
+    depth, velocity,
+    velocity_error=velocity_error,
+    title='VSP Velocity Profile'
+)
+```
 
-This project is currently in active development. Core filtering functionality is being implemented. Contributions, bug reports, and feature requests are welcome!
+## Advanced Usage
 
-### Roadmap
+### Multiple Velocity Models Comparison
 
-- [x] Project initialization and repository setup
-- [ ] Butterworth filter implementation
-- [ ] Chebyshev filter implementation
-- [ ] Spectral filtering methods
-- [ ] Spatial filtering algorithms
-- [ ] Comprehensive test suite
-- [ ] Documentation and tutorials
-- [ ] Performance optimization
-- [ ] PyPI and conda-forge distribution
+```python
+# Define alternative velocity models
+other_profiles = {
+    'Gardner Model': (depth, 1500 + 0.8 * depth),
+    'Linear Model': (depth, 1600 + 1.2 * depth),
+}
+
+# Add geological markers
+markers = {
+    'Layer 1': 300,
+    'Layer 2': 600,
+}
+
+fig, ax = plot_velocity_profile(
+    depth, velocity, velocity_error,
+    velocity_profiles=other_profiles,
+    markers=markers,
+    title='Velocity Profile Comparison'
+)
+```
+
+### High-Resolution Spectrogram
+
+```python
+fig, ax, f, t, Sxx = plot_spectrogram(
+    signal,
+    fs=1000,
+    nperseg=1024,      # Longer segments for better frequency resolution
+    noverlap=896,      # High overlap for better time resolution
+    window='hamming',
+    fmin=10,
+    fmax=200,
+    scale='dB',
+    cmap='inferno'
+)
+```
+
+### Custom DAS Section Styling
+
+```python
+fig, ax = plot_das_section(
+    data, time, distance,
+    wiggle=True,
+    wiggle_scale=2.0,
+    wiggle_color='darkblue',
+    wiggle_fill=True,
+    wiggle_fill_color='navy',
+    wiggle_skip=1,
+    cmap='RdBu_r',
+    vmin=-0.5,
+    vmax=0.5,
+    colorbar_label='Strain Rate',
+    grid=True,
+    figsize=(14, 10),
+    dpi=150
+)
+```
+
+## Examples
+
+The `examples/` directory contains comprehensive demonstrations of all visualization functions:
+
+```bash
+cd examples
+python demo_visualization.py
+```
+
+This will generate multiple example figures showing:
+- Various DAS section display styles
+- Different spectrogram configurations
+- Velocity profile variations
+- Combined multi-panel figures
+
+## API Reference
+
+### plot_das_section()
+
+**Parameters:**
+- `data` (np.ndarray): 2D array of DAS data (n_time, n_channels)
+- `time` (np.ndarray, optional): Time axis values
+- `distance` (np.ndarray, optional): Distance/channel axis values
+- `wiggle` (bool): Enable wiggle trace overlay
+- `wiggle_scale` (float): Scaling factor for wiggle amplitudes
+- `wiggle_skip` (int): Plot every Nth trace
+- `cmap` (str): Colormap for variable density display
+- `figsize` (tuple): Figure size in inches
+- `dpi` (int): Resolution in dots per inch
+- And many more customization options...
+
+**Returns:**
+- `fig`: matplotlib Figure object
+- `ax`: matplotlib Axes object
+
+### plot_spectrogram()
+
+**Parameters:**
+- `data` (np.ndarray): 1D or 2D signal data
+- `fs` (float): Sampling frequency in Hz
+- `nperseg` (int): Length of each segment for STFT
+- `noverlap` (int): Number of overlapping points
+- `window` (str): Window function ('hann', 'hamming', etc.)
+- `fmin`, `fmax` (float): Frequency range to display
+- `scale` (str): 'dB' or 'linear'
+- `cmap` (str): Colormap name
+
+**Returns:**
+- `fig`: matplotlib Figure object
+- `ax`: matplotlib Axes object
+- `f`: Frequency array
+- `t`: Time array
+- `Sxx`: Spectrogram values
+
+### plot_velocity_profile()
+
+**Parameters:**
+- `depth` (np.ndarray): Depth values
+- `velocity` (np.ndarray): Velocity values
+- `velocity_error` (np.ndarray, optional): Uncertainty values
+- `velocity_profiles` (dict, optional): Additional profiles for comparison
+- `markers` (dict, optional): Geological layer markers
+- `invert_yaxis` (bool): Depth increases downward
+- `grid` (bool): Show grid lines
+
+**Returns:**
+- `fig`: matplotlib Figure object
+- `ax`: matplotlib Axes object
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## Citation
-
-If you use DAS-Processing-Toolkit in your research, please cite:
-
-```bibtex
-@software{das_processing_toolkit,
-  author       = {shbokijon},
-  title        = {DAS-Processing-Toolkit: Digital Signal Processing for Distributed Acoustic Sensing Data},
-  year         = {2025},
-  publisher    = {GitHub},
-  url          = {https://github.com/shbokijon/DAS-Processing-Toolkit}
-}
-```
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Citation
+
+If you use this toolkit in your research, please cite:
+
+```bibtex
+@software{das_processing_toolkit,
+  title = {DAS Processing Toolkit},
+  author = {DAS Processing Toolkit Contributors},
+  year = {2024},
+  url = {https://github.com/shbokijon/DAS-Processing-Toolkit}
+}
+```
 
 ## Acknowledgments
 
-- Built with [NumPy](https://numpy.org/) and [SciPy](https://scipy.org/)
-- Inspired by best practices in scientific Python development
-
-## Contact
-
-For questions, suggestions, or collaboration opportunities, please open an issue on GitHub.
-
----
-
-**Note**: This toolkit is designed for research and educational purposes. For production deployments, please thoroughly validate the filtering parameters for your specific DAS system and application.
+This toolkit is designed for researchers and engineers working with Distributed Acoustic Sensing data in applications such as:
+- Seismic monitoring
+- Vertical Seismic Profiling (VSP)
+- Structural health monitoring
+- Pipeline monitoring
+- Traffic monitoring
