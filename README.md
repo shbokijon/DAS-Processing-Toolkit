@@ -1,5 +1,21 @@
 # DAS Processing Toolkit
 
+Digital filters for DAS (Distributed Acoustic Sensing) data preprocessing with advanced wavelet denoising capabilities.
+
+## Features
+
+- **Wavelet-based Denoising**: State-of-the-art wavelet transform denoising using PyWavelets
+- **Multiple Thresholding Methods**:
+  - Soft thresholding (shrinkage)
+  - Hard thresholding (keep/remove)
+- **Threshold Calculation Methods**:
+  - Universal threshold (Donoho & Johnstone)
+  - SURE (Stein's Unbiased Risk Estimate)
+  - Minimax threshold
+- **Multi-level Decomposition**: Analyze and denoise at different wavelet decomposition levels
+- **2D Signal Processing**: Specialized support for DAS data matrices (channels × time)
+- **Comparison Tools**: Compare different denoising methods with comprehensive visualizations
+- **Comprehensive Examples**: Ready-to-run examples for various use cases
 A comprehensive Python toolkit for processing and visualizing Distributed Acoustic Sensing (DAS) data with publication-quality figures.
 
 ## Features
@@ -242,6 +258,13 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## References
+
+1. Donoho, D. L., & Johnstone, J. M. (1994). Ideal spatial adaptation by wavelet shrinkage. *Biometrika*, 81(3), 425-455.
+2. Mallat, S. (2008). *A Wavelet Tour of Signal Processing: The Sparse Way* (3rd ed.). Academic Press.
+3. Daubechies, I. (1992). *Ten Lectures on Wavelets*. SIAM.
 This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## Citation
@@ -249,6 +272,13 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 If you use this toolkit in your research, please cite:
 
 ```bibtex
+@software{das_toolkit,
+  title = {DAS Processing Toolkit},
+  author = {DAS Processing Toolkit Contributors},
+  year = {2025},
+  url = {https://github.com/shbokijon/DAS-Processing-Toolkit}
+}
+```
 @software{das_processing_toolkit,
   title = {DAS Processing Toolkit},
   author = {DAS Processing Toolkit Contributors},

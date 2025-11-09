@@ -1,3 +1,1 @@
-"""
-Test suite for DAS Processing Toolkit.
-"""
+"""Tests for DAS Processing Toolkit"""
